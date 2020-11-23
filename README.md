@@ -1,2 +1,3 @@
-# Disk-Storage
-Library for Disk Storage
+# DiskStorage
+
+A description of this package.
