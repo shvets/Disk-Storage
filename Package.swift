@@ -20,7 +20,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/shvets/Await", from: "1.0.0"),
-        .package(url: "https://github.com/JohnSundell/Files", from: "4.1.1"),
+        .package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
         .package(url: "https://github.com/JohnSundell/Codextended", from: "0.3.0")
     ],
     targets: [
