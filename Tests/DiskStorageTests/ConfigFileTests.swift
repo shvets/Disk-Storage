@@ -1,6 +1,5 @@
 import XCTest
 import Files
-import Await
 
 @testable import DiskStorage
 
@@ -13,39 +12,37 @@ class ConfigFileTests: XCTestCase {
     return ConfigFile<String>(path: path, fileName: fileName)
   }()
 
-  func testSave() throws {
+  func testSave() async throws {
     //try File(path: subject.fileName).delete()
 
     subject.items["key1"] = "value1"
     subject.items["key2"] = "value2"
 
-    if let items = (try Await.await() { handler in
-      self.subject.write(handler)
-    }) {
-      print(try items.prettify())
+    let result = await subject.write()
 
-      XCTAssertEqual(items.keys.count, 2)
-    }
-    else {
-      XCTFail("Error: empty response")
+    switch (result) {
+      case .failure(let error):
+        XCTFail("Error: \(error)")
+      case .success(let items):
+        print(try items.prettify())
+        XCTAssertEqual(items.keys.count, 2)
     }
   }
 
-  func testLoad() throws {
+  func testLoad() async throws {
     let data = "{\"key1\": \"value1\", \"key2\": \"value2\"}".data(using: .utf8)
 
     let folder = try Folder(path: ".")
     try folder.createFile(named: ConfigFileTests.fileName, contents: data!)
 
-    if let items = (try Await.await() { handler in
-      self.subject.read(handler)
-    }) {
-      print(try items.prettify())
+    let result = await subject.read()
 
-      XCTAssertEqual(items.keys.count, 2)
-    }
-    else {
-      XCTFail("Error: empty response")
+    switch (result) {
+      case .failure(let error):
+        XCTFail("Error: \(error)")
+      case .success(let items):
+        print(try items.prettify())
+        XCTAssertEqual(items.keys.count, 2)
     }
   }
 }

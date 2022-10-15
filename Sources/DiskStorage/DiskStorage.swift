@@ -21,93 +21,49 @@ class DiskStorage {
   }
 
   public func getPath() -> String {
-    return String(path.pathComponents.joined(separator: "/").dropFirst())
+    String(path.pathComponents.joined(separator: "/").dropFirst())
   }
 }
 
 extension DiskStorage: ReadableStorage {
-  func read<T: Decodable>(_ type: T.Type, for key: String,
-                          _ handler: @escaping (Result<T, StorageError>) -> Void) {
-    queue.async {
-      let url = self.path.appendingPathComponent(key)
+  func read<T: Decodable>(_ type: T.Type, for key: String) async -> Result<T, StorageError> {
+    await withCheckedContinuation { continuation in
+      let url = path.appendingPathComponent(key)
 
-      if let data = self.fileManager.contents(atPath: url.path) {
+      if let data = fileManager.contents(atPath: url.path) {
         do {
           let value = try JSONDecoder().decode(type, from: data)
 
-          handler(.success(value))
-        } catch {
-          handler(.failure(.genericError(error: error)))
+          continuation.resume(returning: .success(value))
+        }
+        catch {
+          continuation.resume(returning: .failure(.genericError(error: error)))
         }
       }
       else {
-        handler(.failure(.notFound))
+        continuation.resume(returning: .failure(.notFound))
       }
     }
   }
-
-//  func readRx<T: Decodable>(_ type: T.Type, for key: String, using decoder: AnyDecoder = JSONDecoder()) -> Observable<T> {
-//    return Observable.create { observer in
-//      let url = self.path.appendingPathComponent(key)
-//
-//      if let data = self.fileManager.contents(atPath: url.path) {
-//        do {
-//          let value = try decoder.decode(type, from: data)
-//
-//          observer.onNext(value)
-//          observer.onCompleted()
-//        } catch {
-//          observer.onError(StorageError.genericError(error: error))
-//        }
-//      }
-//      else {
-//        observer.onError(StorageError.notFound)
-//      }
-//
-//      return Disposables.create()
-//    }
-//  }
 }
 
 extension DiskStorage: WritableStorage {
-  func write<T: Encodable>(_ value: T, for key: String,
-                           _ handler: @escaping (Result<T, StorageError>) -> Void = { _ in }) {
-    queue.async {
-      let url = self.path.appendingPathComponent(key)
+  @discardableResult func write<T: Encodable>(_ value: T, for key: String) async -> Result<T, StorageError> {
+    await withCheckedContinuation { continuation in
+      let url = path.appendingPathComponent(key)
 
       do {
-        try self.createFolders(in: url)
+        try createFolders(in: url)
 
         let data = try JSONEncoder().encode(value)
 
         try data.write(to: url, options: .atomic)
 
-        handler(.success(value))
-      } catch {
-        handler(.failure(.genericError(error: error)))
+        continuation.resume(returning: .success(value))
+      }
+      catch {
+        continuation.resume(returning: .failure(.genericError(error: error)))
       }
     }
   }
-
-//  func writeRx<T: Encodable>(_ value: T, for key: String, using encoder: AnyEncoder = JSONEncoder()) -> Observable<T> {
-//    return Observable.create { observer in
-//
-//      let url = self.path.appendingPathComponent(key)
-//
-//      do {
-//        try self.createFolders(in: url)
-//
-//        let data = try encoder.encode(value)
-//
-//        try data.write(to: url, options: .atomic)
-//
-//        observer.onNext(value)
-//        observer.onCompleted()
-//      } catch {
-//        observer.onError(StorageError.genericError(error: error))
-//      }
-//
-//      return Disposables.create()
-//    }
-//  }
 }

@@ -13,7 +13,7 @@ protocol Configuration {
 
   func remove(_ key: String) -> Bool
   
-  func read(_ handler: @escaping (Result<[String: Item], StorageError>) -> Void)
+  func read() async -> Result<[String: Item], StorageError>
 
-  func write(_ handler: @escaping (Result<[String: Item], StorageError>) -> Void)
+  func write() async -> Result<[String: Item], StorageError>
 }

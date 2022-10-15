@@ -21,7 +21,7 @@ open class ConfigFile<T: Codable> {
   private let storage: DiskStorage!
 
   public init(path: URL, fileName: String) {
-    self.storage = DiskStorage(path: path)
+    storage = DiskStorage(path: path)
 
     self.fileName = fileName
   }
@@ -44,13 +44,13 @@ extension ConfigFile: Configuration {
     items.removeValue(forKey: key) != nil
   }
 
-  public func read(_ handler: @escaping (Result<[String: T], StorageError>) -> Void) {
+  public func read() async -> Result<[String: T], StorageError> {
     clear()
 
-    self.storage.read([String: T].self, for: self.fileName, handler)
+    return await storage.read([String: T].self, for: fileName)
   }
 
-  public func write(_ handler: @escaping (Result<[String: T], StorageError>) -> Void) {
-    self.storage.write(self.items, for: self.fileName, handler)
+  @discardableResult public func write() async -> Result<[String: T], StorageError> {
+    await storage.write(items, for: fileName)
   }
 }

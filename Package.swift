@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,9 +6,9 @@ import PackageDescription
 let package = Package(
     name: "DiskStorage",
     platforms: [
-      .macOS(.v10_12),
-      .iOS(.v12),
-      .tvOS(.v12)
+      .macOS(.v13),
+      .iOS(.v16),
+      .tvOS(.v16)
   ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -19,7 +19,6 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/shvets/Await", from: "1.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
         .package(url: "https://github.com/JohnSundell/Codextended", from: "0.3.0")
     ],
@@ -31,6 +30,6 @@ let package = Package(
             dependencies: ["Files"]),
         .testTarget(
             name: "DiskStorageTests",
-            dependencies: ["DiskStorage", "Await", "Files", "Codextended"]),
+            dependencies: ["DiskStorage", "Files", "Codextended"]),
     ]
 )

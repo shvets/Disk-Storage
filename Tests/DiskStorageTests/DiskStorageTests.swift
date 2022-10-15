@@ -4,7 +4,7 @@ import Await
 @testable import DiskStorage
 
 final class DiskStorageTests: XCTestCase {
-  func testStorage() throws {
+  func testStorage() async throws {
     struct Timeline: Codable, Equatable {
       let tweets: [String]
     }
@@ -14,21 +14,16 @@ final class DiskStorageTests: XCTestCase {
 
     let timeline = Timeline(tweets: ["Hello", "World", "!!!"])
 
-    try Await.await() { handler in
-      storage.write(timeline, for: "timeline", handler)
-    }
+    await storage.write(timeline, for: "timeline")
 
-    let result = try Await.await() { handler in
-     storage.read(Timeline.self, for: "timeline", handler)
-    }
+    let result = await storage.read(Timeline.self, for: "timeline")
 
-    if let result = result {
-      print(try result.prettify())
-
-      XCTAssertEqual(result, timeline)
-    }
-    else {
-      XCTFail("Error: empty response")
+    switch (result) {
+      case .failure(let error):
+        XCTFail("Error: \(error)")
+      case .success(let result):
+        print(try result.prettify())
+        XCTAssertEqual(result, timeline)
     }
   }
 }
