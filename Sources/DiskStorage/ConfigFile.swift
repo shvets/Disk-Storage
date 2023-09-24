@@ -44,7 +44,7 @@ extension ConfigFile: Configuration {
     items.removeValue(forKey: key) != nil
   }
 
-  public func read() async -> Result<[String: T], StorageError> {
+  @discardableResult public func read() async -> Result<[String: T], StorageError> {
     clear()
 
     return await storage.read([String: T].self, for: fileName)
